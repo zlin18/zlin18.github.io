@@ -1,0 +1,353 @@
+---
+title: "Untitled"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+
+```{r}
+install.packages("lubridate")
+install.packages("ggplot2")
+install.packages("data.table")
+install.packages("ggrepel")
+install.packages("dplyr")
+install.packages("data.table")
+install.packages("tidyverse")
+library(ggmap)
+library(lubridate)
+library(ggplot2)
+library(dplyr)
+library(data.table)
+library(ggrepel)
+library(tidyverse)
+```
+
+```{r}
+ggmap::register_google(key = "AIzaSyDbE9EqCLzxRP48VBvAq_LAwkYqAeCOB5U")
+
+if(!requireNamespace("devtools")) install.packages("devtools")
+devtools::install_github("dkahle/ggmap", ref = "tidyup", force=TRUE)
+```
+# Plot the homeless services 
+```{r}
+homeless <- read_csv("Homeless_Service_Facilities.csv")
+ggplot(data=homeless) +
+  geom_point(aes(x=X,y=Y), alpha=0.2)
+```
+
+# Add the background Google Map
+```{r}
+p <- ggmap(get_googlemap(center = c(lon = -77.04, lat = 38.90),
+                    zoom = 12, scale = 2,
+                    maptype ='terrain',
+                    color = 'color'))
+
+p
+
+p + geom_point(data=homeless,aes(x=X,y=Y), alpha=0.5)
+```
+
+```{r}
+clothing = homeless %>% 
+  filter(CLOTHING=="Yes") %>%
+  select(c("X","Y","OBJECTID","ORGANIZATION_NAME","PROGRAM_NAME","WEBSITE_URL","STREET_ADDRESS","ZIP","CLOTHING")) 
+
+computers = homeless %>% 
+  filter(COMPUTERS=="Yes") %>%
+  select(c("X","Y","OBJECTID","ORGANIZATION_NAME","PROGRAM_NAME","WEBSITE_URL","STREET_ADDRESS","ZIP","COMPUTERS")) 
+
+dental_services = homeless %>% 
+  filter(DENTAL_SERVICES=="Yes") %>%
+  select(c("X","Y","OBJECTID","ORGANIZATION_NAME","PROGRAM_NAME","WEBSITE_URL","STREET_ADDRESS","ZIP","DENTAL_SERVICES")) 
+
+documentation_assistance = homeless %>% 
+  filter(DOCUMENTATION_ASSISTANCE=="Yes") %>%
+  select(c("X","Y","OBJECTID","ORGANIZATION_NAME","PROGRAM_NAME","WEBSITE_URL","STREET_ADDRESS","ZIP","DOCUMENTATION_ASSISTANCE")) 
+
+domestic_violence_services = homeless %>% 
+  filter(DOMESTIC_VIOLENCE_SERVICES=="Yes") %>%
+  select(c("X","Y","OBJECTID","ORGANIZATION_NAME","PROGRAM_NAME","WEBSITE_URL","STREET_ADDRESS","ZIP","DOMESTIC_VIOLENCE_SERVICES")) 
+
+food = homeless %>% 
+  filter(FOOD_GROCERIES=="Yes" | MEALS == "Yes") %>%
+  select(c("X","Y","OBJECTID","ORGANIZATION_NAME","PROGRAM_NAME","WEBSITE_URL","STREET_ADDRESS","ZIP")) 
+  
+haircuts = homeless %>% 
+  filter(HAIRCUTS=="Yes") %>%
+  select(c("X","Y","OBJECTID","ORGANIZATION_NAME","PROGRAM_NAME","WEBSITE_URL","STREET_ADDRESS","ZIP","HAIRCUTS")) 
+
+hiv_testing = homeless %>% 
+  filter(HIV_TESTING=="Yes") %>%
+  select(c("X","Y","OBJECTID","ORGANIZATION_NAME","PROGRAM_NAME","WEBSITE_URL","STREET_ADDRESS","ZIP","HIV_TESTING")) 
+
+shelter = homeless %>% 
+  filter(HOUSING=="Yes") %>%
+  select(c("X","Y","OBJECTID","ORGANIZATION_NAME","PROGRAM_NAME","WEBSITE_URL","STREET_ADDRESS","ZIP","HOUSING")) 
+
+housing_navigation = homeless %>% 
+  filter(HOUSING_NAVIGATION=="Yes") %>%
+  select(c("X","Y","OBJECTID","ORGANIZATION_NAME","PROGRAM_NAME","WEBSITE_URL","STREET_ADDRESS","ZIP","HOUSING_NAVIGATION")) 
+
+laundry = homeless %>% 
+  filter(LAUNDRY=="Yes") %>%
+  select(c("X","Y","OBJECTID","ORGANIZATION_NAME","PROGRAM_NAME","WEBSITE_URL","STREET_ADDRESS","ZIP","LAUNDRY"))
+
+legal_services = homeless %>% 
+  filter(LEGAL_SERVICES=="Yes") %>%
+  select(c("X","Y","OBJECTID","ORGANIZATION_NAME","PROGRAM_NAME","WEBSITE_URL","STREET_ADDRESS","ZIP","LEGAL_SERVICES")) 
+
+medical_services = homeless %>% 
+  filter(MEDICAL_SERVICES=="Yes") %>%
+  select(c("X","Y","OBJECTID","ORGANIZATION_NAME","PROGRAM_NAME","WEBSITE_URL","STREET_ADDRESS","ZIP","MEDICAL_SERVICES")) 
+
+mental_health_services = homeless %>% 
+  filter(MENTAL_HEALTH=="Yes") %>%
+  select(c("X","Y","OBJECTID","ORGANIZATION_NAME","PROGRAM_NAME","WEBSITE_URL","STREET_ADDRESS","ZIP","MENTAL_HEALTH")) 
+
+phone = homeless %>% 
+  filter(PHONE=="Yes") %>%
+  select(c("X","Y","OBJECTID","ORGANIZATION_NAME","PROGRAM_NAME","WEBSITE_URL","STREET_ADDRESS","ZIP","PHONE")) 
+
+showers = homeless %>% 
+  filter(SHOWERS=="Yes") %>%
+  select(c("X","Y","OBJECTID","ORGANIZATION_NAME","PROGRAM_NAME","WEBSITE_URL","STREET_ADDRESS","ZIP","SHOWERS")) 
+
+substance_abuse_treatment = homeless %>% 
+  filter(SUBSTANCE_ABUSE_TREATMENT=="Yes") %>%
+  select(c("X","Y","OBJECTID","ORGANIZATION_NAME","PROGRAM_NAME","WEBSITE_URL","STREET_ADDRESS","ZIP","SUBSTANCE_ABUSE_TREATMENT")) 
+
+employment =  homeless %>% 
+  filter(SUPPORTED_EMPLOYMENT=="Yes") %>%
+  select(c("X","Y","OBJECTID","ORGANIZATION_NAME","PROGRAM_NAME","WEBSITE_URL","STREET_ADDRESS","ZIP","SUPPORTED_EMPLOYMENT")) 
+
+financial_assistance = homeless %>% 
+  filter(TANF_FINANCIAL_ASSISTANCE=="Yes") %>%
+  select(c("X","Y","OBJECTID","ORGANIZATION_NAME","PROGRAM_NAME","WEBSITE_URL","STREET_ADDRESS","ZIP","TANF_FINANCIAL_ASSISTANCE")) 
+
+transportation  = homeless %>% 
+  filter(TRANSPORTATION=="Yes") %>%
+  select(c("X","Y","OBJECTID","ORGANIZATION_NAME","PROGRAM_NAME","WEBSITE_URL","STREET_ADDRESS","ZIP","TRANSPORTATION")) 
+```
+
+## Static map (only included a few categories)
+```{r}
+q <- p + geom_point(data=food,aes(x=X,y=Y), alpha=0.5, color="red", size=2.5) + geom_point(data=shelter,aes(x=X,y=Y), alpha=0.5, color="blue", size=2.5) + geom_point(data=clothing,aes(x=X,y=Y), alpha=0.5, color="yellow", size=2.5) + geom_point(data=computers,aes(x=X,y=Y), alpha=0.5, color="purple", size=2.5) + geom_point(data=dental_services,aes(x=X,y=Y), alpha=0.5, color="green", size=2.5) + geom_point(data=documentation_assistance,aes(x=X,y=Y), alpha=0.5, color="black", size=2.5) + geom_point(data=domestic_violence_services,aes(x=X,y=Y), alpha=0.5, color="deeppink4", size=2.5) 
+q
+```
+
+# Interactive?
+
+```{r}
+suppressPackageStartupMessages(library(plotly))
+ggplotly(q, tooltip = c("text", "size"))
+```
+
+```{r}
+Sys.setenv('MAPBOX_TOKEN' = 'pk.eyJ1IjoiemhpeXUxOTk3IiwiYSI6ImNrNTV3bmg0NTB5bW0zbXF2cWN1ZTBkYzIifQ.YXEicU9bKbZjvswQRt9kNw')
+plot_mapbox(maps::canada.cities)
+plot_mapbox(res_mn)
+
+map_data("state","district of columbia") %>%
+  group_by(group) %>%
+  plot_mapbox(x = ~long, y = ~lat) 
+  geom_point(data=food,aes(x=X,y=Y), alpha=0.5, color="red", size=2.5)
+
+
+
+
+#%>%get_googlemap(center = c(lon = -77.04, lat = 38.90), zoom = 12, scale = 2, maptype ='terrain', color = 'color')
+
+
+  
+library(htmltools)
+browsable(tagList(map1, map2))
+
+
+
+layout(
+  plot_mapbox(), 
+  mapbox = list(style = "streets"),
+  updatemenus = list(
+    list(y = 0.8)
+  )
+)
+
+
+plot_mapbox(maps::canada.cities) %>%
+  add_markers(
+    x = ~long, 
+    y = ~lat, 
+    size = ~pop, 
+    color = ~country.etc,
+    colors = "Accent",
+    text = ~paste(name, pop),
+    hoverinfo = "text"
+  )
+
+
+plot_mapbox() %>%
+  add_markers(data=food, x=food$X, y=food$Y)
+
+```
+
+```{R}
+library(sp)
+library(leaflet)
+library(htmltools)
+library(htmlwidgets)
+
+
+
+##########
+food_df <- data.frame(longitude = food$X,
+                      latitude = food$Y,
+                      info = paste(food$ORGANIZATION_NAME," - ",food$STREET_ADDRESS))
+
+m = leaflet(big_df) %>% 
+  addCircleMarkers(label = ~htmlEscape(info), 
+                   radius = ~ifelse(big_df$type == "food", 8, ifelse(big_df$type== "clothing", 6, ifelse(big_df$type == "dental", 4, 2))), 
+                   color= ~ifelse(big_df$type == "food", "red", ifelse(big_df$type == "clothing", "green", ifelse(big_df$type == "dental", "purple","blue")))) %>% 
+  addTiles()
+
+saveWidget(m, file="better_map_homeless.html")
+
+x = rep("", 115)
+data_proc_func <- function(data){
+  for(i in c(1:115)){  # row
+    for(j in c(12:64)){   # column
+      print(data[i,j])
+      if(!is.na(data[i,j])){
+        #x[i] = paste(x[i], names(data)[j])
+      }
+    }
+  }
+}
+
+data_proc_func(homeless)
+
+x
+  
+  
+  
+
+names(homeless)
+
+
+
+```
+
+```{r}
+clothing_df = data.frame(longitude = clothing$X,
+                      latitude = clothing$Y,
+                      type = "clothing",
+                      info = paste(clothing$ORGANIZATION_NAME," - ",clothing$STREET_ADDRESS, " - ", rep("clothing",nrow(clothing))))
+
+computers_df = data.frame(longitude = computers$X,
+                      latitude = computers$Y,
+                      type = "computers",
+                      info = paste(computers$ORGANIZATION_NAME," - ",computers$STREET_ADDRESS, " - ", rep("computers", nrow(computers))))
+
+dental_services_df = data.frame(longitude = dental_services$X,
+                      latitude = dental_services$Y,
+                      type = "dental",
+                      info = paste(dental_services$ORGANIZATION_NAME," - ",dental_services$STREET_ADDRESS, " - ", rep("dental", nrow(dental_services))))
+
+documentation_assistance_df = data.frame(longitude = documentation_assistance$X,
+                      latitude = documentation_assistance$Y,
+                      type = "documentations", 
+                      info = paste(documentation_assistance$ORGANIZATION_NAME," - ",documentation_assistance$STREET_ADDRESS, " - ", rep("documentations", nrow(documentation_assistance))))
+
+domestic_violence_services_df = data.frame(longitude = domestic_violence_services$X,
+                      latitude = domestic_violence_services$Y,
+                      type = "domestic_violence",
+                      info = paste(domestic_violence_services$ORGANIZATION_NAME," - ",domestic_violence_services$STREET_ADDRESS, " - ", rep("domestic_violence", nrow(domestic_violence_services))))
+
+food_df = data.frame(longitude = food$X,
+                      latitude = food$Y,
+                     type = "food",
+                      info = paste(food$ORGANIZATION_NAME," - ",food$STREET_ADDRESS, " - ", rep("food", nrow(food))))
+  
+haircuts_df = data.frame(longitude = haircuts$X,
+                      latitude = haircuts$Y,
+                      type = "haircuts",
+                      info = paste(haircuts$ORGANIZATION_NAME," - ",haircuts$STREET_ADDRESS, " - ", rep("haircuts", nrow(haircuts))))
+
+hiv_testing_df = data.frame(longitude = hiv_testing$X,
+                      latitude = hiv_testing$Y,
+                      type = "hiv_testing",
+                      info = paste(hiv_testing$ORGANIZATION_NAME," - ",hiv_testing$STREET_ADDRESS, " - ", rep("hiv_testing", nrow(hiv_testing))))
+
+shelter_df = data.frame(longitude = shelter$X,
+                      latitude = shelter$Y,
+                      type = "shelter",
+                      info = paste(shelter$ORGANIZATION_NAME," - ",shelter$STREET_ADDRESS, " - ", rep("shelter", nrow(shelter))))
+
+housing_navigation_df = data.frame(longitude = housing_navigation$X,
+                      latitude = housing_navigation$Y,
+                      type = "housing_navigation",
+                      info = paste(housing_navigation$ORGANIZATION_NAME," - ",housing_navigation$STREET_ADDRESS, " - ", rep("housing_navigation", nrow(housing_navigation))))
+
+laundry_df = data.frame(longitude = laundry$X,
+                      latitude = laundry$Y,
+                      type = "laundry",
+                      info = paste(laundry$ORGANIZATION_NAME," - ",laundry$STREET_ADDRESS, " - ", rep("laundry", nrow(laundry))))
+
+
+legal_services_df = data.frame(longitude = legal_services$X,
+                      latitude = legal_services$Y,
+                      type = "legal",
+                      info = paste(legal_services$ORGANIZATION_NAME," - ",legal_services$STREET_ADDRESS, " - ", rep("legal", nrow(legal_services))))
+
+
+medical_services_df = data.frame(longitude = medical_services$X,
+                      latitude = medical_services$Y,
+                      type = "medical",
+                      info = paste(medical_services$ORGANIZATION_NAME," - ",medical_services$STREET_ADDRESS, " - ", rep("medical", nrow(medical_services))))
+
+
+mental_health_services_df = data.frame(longitude = mental_health_services$X,
+                      latitude = mental_health_services$Y,
+                      type = "mental",
+                      info = paste(mental_health_services$ORGANIZATION_NAME," - ",mental_health_services$STREET_ADDRESS, " - ", rep("mental", nrow(mental_health_services))))
+
+
+phone_df = data.frame(longitude = phone$X,
+                      latitude = phone$Y,
+                      type = "phone",
+                      info = paste(phone$ORGANIZATION_NAME," - ",phone$STREET_ADDRESS, " - ", rep("phone", nrow(phone))))
+
+showers_df = data.frame(longitude = showers$X,
+                      latitude = showers$Y,
+                      type = "showers",
+                      info = paste(showers$ORGANIZATION_NAME," - ",showers$STREET_ADDRESS, " - ", rep("showers", nrow(showers))))
+
+substance_abuse_treatment_df = data.frame(longitude = substance_abuse_treatment$X,
+                      latitude = substance_abuse_treatment$Y,
+                      type = "substance_abuse_treatment",
+                      info = paste(substance_abuse_treatment$ORGANIZATION_NAME," - ",substance_abuse_treatment$STREET_ADDRESS, " - ", rep("substance_abuse_treatment", nrow(substance_abuse_treatment))))
+
+employment_df =  data.frame(longitude = employment$X,
+                      latitude = employment$Y,
+                      type = "employment",
+                      info = paste(employment$ORGANIZATION_NAME," - ",employment$STREET_ADDRESS, " - ", rep("employment", nrow(employment))))
+
+financial_assistance_df = data.frame(longitude = financial_assistance$X,
+                      latitude = financial_assistance$Y,
+                      type = "financial_assistance",
+                      info = paste(financial_assistance$ORGANIZATION_NAME," - ",financial_assistance$STREET_ADDRESS, " - ", rep("financial_assistance", nrow(financial_assistance))))
+
+transportation_df  =  data.frame(longitude = transportation$X,
+                      latitude = transportation$Y,
+                      type = "transportation",
+                      info = paste(transportation$ORGANIZATION_NAME," - ",transportation$STREET_ADDRESS, " - ", rep("transportation", nrow(transportation))))
+
+
+big_df = rbind(clothing_df, computers_df, food_df, dental_services_df, documentation_assistance_df, domestic_violence_services_df, employment_df, haircuts_df, hiv_testing_df, housing_navigation_df, laundry_df, legal_services_df, medical_services_df, mental_health_services_df, phone_df, shelter_df, showers_df, substance_abuse_treatment_df, transportation_df)
+
+
+
+```
