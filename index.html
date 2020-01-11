@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<link href="my.css" rel="stylesheet" type="text/css" />
+	<title>Zhiyu Lin</title>
+	<script>
+	function copy(dest, source) {
+  		if(dest.source == source) {
+  		  dest.innerHTML = "";
+  		  dest.source = null;
+  		}
+  		else {
+  		  dest.innerHTML = source.innerHTML;
+  		  dest.source = source;
+  		}
+  		dest.blur();
+	}
+	</script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.0/jquery.min.js"></script>
+</head>
+
+<body>
+
+<div id="wrapper">
+
+
+<!-- header info -->
+<div id="header">
+<div id="profile">
+	<img src="websitepic.jpeg" height=250>
+</div>
+<div id="contact">	
+	<table border="0">
+	<tr>
+    <th><font size=5><b>Zhiyu Lin </b> &nbsp;</font></th>
+    <td><font size=3<b> MS Candidate in Analytics, Georgetown University </b> &nbsp;</font></td>
+	</tr>
+	</table>
+	<br>
+	Data Scientist & Business Analyst <br>
+	Machine Learning | Statistical Modeling | Cloud Computing | Visualizations <br>
+    <p><font face="courier">zhiyu.lin18@gmail.com</font></p>
+    <p><font face="courier">zl281@georgetown.edu</font></p>
+    <p>
+    [<a href="https://github.com/zlin18/zlin18.github.io/blob/master/Zhiyu%20Lin%20Resume%201:8:20.pdf">Resume</a>]
+    </p>
+	<br>
+
+</div>
+</div>
+
+<!-- main content -->
+<div id="content">
+<div class="section">
+    <p>
+    I am a highly motivated data scientist with 4 years of experience and a Master’s degree in progress. I am skilled at <br>
+    <ul>
+        <li> Collecting, analyzing and interpreting large volumes of data</li>
+        <li> Designing and implementing innovative solutions for complex business and research problems</li>
+        <li> Extracting patterns from noisy data and communicating findings to a diverse audience. </li>
+    </ul>
+    <br>
+    I am a critical thinker and I especially love tackling machine learning, natural language processing and statistical computing problems. Take a look at my past projects below! <br>
+    <br>
+    Currently, I am looking for summer 2020 internships and full-time positions post December 2020.  
+    </p>
+
+</div>
+<hr color="#">
+<div class="section">
+<div class="section_title"><p id="pubs"><b>Projects</b> </p></div>
+<p><b><a href="https://ziheyang.github.io/yelp_events/index.html">Machine Learning and Statistical Modeling on Event Attendance in New York</a></b><br>
+    <br>
+    <b>Authors: </b> Zhiyu Lin, Jiamin Zhong, Zihe Yang <br>
+    <br>
+    What Factors into people's decisions on attending events? We looked into Yelp events attendance patterns through classification models such as Random Forest, K-Means,Decision Trees, SVMs, and Naive Bayes, regression models including linear and logistic regression, as well as unsupervised learning methods such as topic modeling, association rule mining, PCA dimension reduction and hypothesis testing. Click on the link to see some interesting results and cool visualizations. <br>
+    [<a href="https://github.com/zlin18/ANLY501Project">code & data</a>]<br>
+    <br>
+</p>
+<br>
+<p><b><a href="https://github.com/zlin18/NLPFraudDetection/blob/master/Natural%20Language%20Processing%20for%20E-Commerce%20Trademark%20Infringement%20Detection.pdf">Natural Language Processing (NLP) & Machine Learning on Fraud Detection</a></b><br>
+    <br>
+    <b>Authors: </b> Zhiyu Lin, Duo Cao <br>
+    <br>
+    Online shopping websites are prone to scams. Many products claiming to be certain trademarked brands are actually fake, causing confusion and legal issues. Could customer reviews help? Take Vans sneakers for example, we scraped 17,000 customer reviews on Vans listings from taobao.com and built a text profile for this brand through Python packages (NLTK, Pandas, Numpy, Scikit-Learn). Turns out, machine learning models can catch the fake sneakers with an 87% success rate. <br>
+    [<a href="https://github.com/zlin18/NLPFraudDetection">code & data</a>]<br>
+    <br>
+</p>
+<br>
+<p><b><a href="https://github.com/zlin18/SurvivalAnalysisSupremeCourtDecisions/blob/master/Zhiyu%20Capstone%20Final%20Paper.pdf">Survival Analysis on Predicting the U.S. Supreme Court’s Decisions </a></b><br>
+    <br>
+    <b>Author: </b> Zhiyu Lin <b>Advisors: </b> Vittorio Addona, Patrick Schmidt <br>
+    <br>
+    The U.S. Supreme Court follows a doctrine “stare decisis”, meaning that they have to judge a case based on prior decisions. This doctrine ensures the Court’s accountability and legitimacy. Yet in the past 70 years, the Court has overruled almost 200 decisions (out of nearly 9,000 in total). When and why did this happen? Survival analysis models (studying the development of events over time) provided some statistical explanations including how the judges make decisions balancing the constraint of legal norms and their policy preferences. <br>
+    [<a href="https://github.com/zlin18/SurvivalAnalysisSupremeCourtDecisions">code & data</a>]<br>
+    <br>
+</p>
+<br>
+<p><b><a href="https://github.com/zlin18/ANLY561DiscriminationProject/blob/master/561_poster_final.pdf">Model Comparison for Discrimination on National Origins </a></b><br>
+    <br>
+    <b>Authors: </b> Zhiyu Lin, Ning Hu, Tianxing Jiang, Kuiyu Zhu <br>
+    <br>
+    Algorithmic fairness has a profound impact on societies as algorithms start to dictate decision makings in almost every industry. Biased crime prediction algorithms could discriminate against black and Latino people, and poorly designed employment algorithms could discriminate against women in the job market. What about national origin?  Do machine learning algorithms implement socioeconomic discrimination against minority groups on the dimension of national origin? Turns out they do! We looked into the mathematical reasons why. <br>
+    [<a href="https://github.com/zlin18/ANLY561DiscriminationProject">code & data</a>]<br>
+    <br>
+</p>
+<br>
+<p><b><a href="https://github.com/zlin18/ANLY511PatentProject/blob/master/ANLY511_Paper_Final%20v3.pdf">Technology Patent Trends & Economic Prosperity </a></b><br>
+    <br>
+    <b>Authors: </b> Zhiyu Lin, Jingjie Ma, Thomas P. Malejko, Douglas Post, Nuo Tian, Nuoya Wu <br>
+    <br>
+    The study of patent trends was one of the first attempts to measure the amount of inventive effort in an industry. However, during the information age, patents have become less prominent for popular technology-based inventions. We looked at the technology patent trends during the Dot-Com Bubble (1994-2000), the Housing Bubble (mid-2000s), the Dot-Com Bust (2001-2004) and the Great Recession (2018). Here are some interesting findings! <br>
+    [<a href="https://github.com/zlin18/ANLY511PatentProject">code & data</a>]<br>
+    <br>
+</p>
+<br>
+<p><b><a href="https://zlin18.github.io/homeless/index.html">Homeless Service Facilities in Washington DC </a></b><br>
+    <br>
+    <b>Author: </b> Zhiyu Lin<br>
+    <br>
+    Washington DC has the highest family homeless percentage, almost tripling the second highest state (New York). What are the service facilities, what do they provide, and where are they located? Check out this map I made! <br>
+    [<a href="https://github.com/zlin18/zlin18.github.io/tree/master/homeless">code & data</a>]<br>
+    <br>
+</p>
+</div>
+<!-- content end -->
+</div>
+</body>
