@@ -1,0 +1,398 @@
+---
+title: "| Introduction to Data Science    \n| Activity A5: Visualization of Spatial Data and Storytelling Practice\n"
+author: "INSERT STUDENT NAME HERE"
+output:
+  bookdown::html_document2:
+    split_by: none
+    toc: no
+
+---
+
+```{r setup, include=FALSE}
+library(tidyverse)
+library(ggplot2)
+library(gplots)
+library(ggmap)
+library(RColorBrewer)
+library(viridis)
+knitr::opts_chunk$set(tidy = FALSE, message=FALSE, warning=FALSE)
+options(htmltools.dir.version = FALSE)
+```
+
+Note: Rather than directly knitting this file, you may be better off running each chunk in succession with the little green triangles, and then knitting it afterwards.
+
+# Visualizing Spatial Data
+
+
+## Scatterplots
+
+The `Starbucks` data, provided by Danny Kaplan, contains information about every Starbucks in the world:    
+
+```{r}
+Starbucks <- read_csv("https://www.macalester.edu/~ajohns24/Data/Starbucks.csv")
+```    
+
+`Starbucks` includes the `Latitude` and `Longitude` of each location.  We want to construct a visualization of the relationship between these two.  THINK: Which of these should go on the y-axis?
+
+```{r}
+ggplot(data=Starbucks) +
+  geom_point(aes(x=Longitude,y=Latitude), alpha=0.2)
+```
+
+The point pattern probably looks familiar!  To highlight the geographical nature of this scatterplot, we can superimpose the points on top of a map, using the `ggmap` function in the `ggmap` library. Note: if you have trouble running this next chunk, you may have to (1) install the `devtools` package and (2) reinstall `ggmap` using the following line:
+
+```
+devtools::install_github("dkahle/ggmap")
+```
+
+```{r cache=TRUE}
+WorldMap <- get_map(location=c(lon=0,lat=0), source="google", zoom=2)
+ggmap(WorldMap) +
+    geom_point(data=Starbucks, aes(x=Longitude,y=Latitude), alpha=0.2)
+```
+
+We can set the center location and zoom level:
+```{r fig.width=8, cache=TRUE}
+US_map <- get_map(location=c(lon=-100,lat=40), source="google", zoom=3)
+ggmap(US_map) +
+    geom_point(data=Starbucks, aes(x=Longitude,y=Latitude), alpha=0.2)
+    
+TC_map <- get_map(location=c(lon=-93.1687,lat=44.9398),source="google")
+ggmap(TC_map) +
+    geom_point(data=Starbucks, aes(x=Longitude,y=Latitude))
+```
+
+```{exercise, name="Starbucks Locations"}
+   
+
+a. Re-examine the syntax of the above example. Explain the purpose of the `zoom` argument and how it works.   
+b. Construct a new map of Starbucks locations in your birth state (if you were born in the U.S.) or birth country (if you were born outside the U.S..). Choose an appropriate zoom level.   
+c. Returning to the full world map, set the center location to a latitude of 10 degrees and longitude of -40 degrees. Use the stamen: toner map.   
+d. Add an aesthetic that sets the color of the points according to the ownership type. What, if anything, can you deduce from this visualization?   
+
+```
+
+```{exercise, name="Nice Ride Stations"}
+Here is a list of [Nice Ride](https://www.niceridemn.com/) stations around the Twin Cities, along with the number of docks at each station in 2016:
+
+```
+
+```{r}
+Stations <-
+  read_csv("http://www.macalester.edu/~dshuman1/data/112/Nice_Ride_2016_Station_Locations.csv")
+```
+
+Make a map of the stations with both the color and size of each glyph set according to the number of docks.
+
+
+## Contour maps
+
+The `geom_density_2d` and `stat_density_2d` functions are great for plotting distributions over spatial regions. Here is an example that shows the densities of Starbucks in the North America.
+
+```{r}
+US_map <- get_map(location=c(lon=-100,lat=40), source="google", zoom=4)
+ggmap(US_map)+
+  geom_density_2d(data=Starbucks, aes(x=Longitude,y=Latitude),size=.3)+
+  stat_density_2d(data = Starbucks, 
+    aes(x=Longitude,y=Latitude, fill = ..level.., alpha = ..level..), 
+    size = 0.1, bins = 20, geom = "polygon") + 
+  scale_alpha(guide = FALSE) +
+  scale_fill_gradient(low = "green", high = "red", 
+    guide = FALSE)
+```
+
+[Here](https://www.stoltzmaniac.com/exploratory-data-analysis-of-tropical-storms-in-r/) is another nice example of a contour plot for tropical storms, with the code posted [here](https://github.com/stoltzmaniac/Tropical-Storm-Data-Analysis/blob/master/Tropical%20Storm%20EDA.Rmd).
+
+
+
+## Choropleths
+
+Geographical data needn't be expressed by latitude and longitude. For choropleth maps, instead of visualizing our data as points with different aesthetics (size, color, transparency, etc.), we color different regions of the maps based on data values. To do this we need to specify both the geometric regions on which the data resides (counties, states, zip codes, etc.), and then wrangle the data so that there is one value per region. 
+
+As an example, we will reconsider the `elect` data which included county-level election and demographic variables:    
+
+```{r}
+elect <- read_csv("https://www.macalester.edu/~ajohns24/data/electionDemographics16.csv")
+```
+
+Here are a few different ways to do this (others exist as well):^[[This demo](https://cengel.github.io/rspatial/4_Mapping.nb.html#choropleth-mapping-with-ggplot2) gives examples of most of these different options.]
+
+### Option 1: `choroplethr`
+
+```{r}
+library(choroplethr)
+library(choroplethrMaps)
+```
+
+The `county_choropleth` function requires the variable of interest to be stored as `value` in the `elect` data. The following code does this: 
+```{r}
+#use but don't worry about this syntax
+elect <- elect %>% mutate(value=perrep_2016)
+```
+
+Some example maps with the `choroplethr` package:
+```{r, cache=TRUE}
+county_choropleth(elect)+
+  scale_fill_manual(values = rev(brewer.pal(7,"RdBu")))
+county_choropleth(elect, state_zoom="minnesota")+
+  scale_fill_manual(values = rev(brewer.pal(7,"RdBu")))
+county_choropleth(elect, state_zoom="minnesota", reference_map = TRUE)+
+  scale_fill_manual(values = rev(brewer.pal(7,"RdBu")))
+```
+
+
+```{exercise}
+   
+a. Make and summarize the trends in a national map of `winrep_2016`, the indicator of whether or not Trump won each county.  Don't forget to first define this as your `value` of interest:    
+
+```
+
+```
+elect <- elect %>% mutate(value=winrep_2016)    
+```
+
+b. Make and summarize the trends in a national map of a different `elect` variable of your choice!
+
+### Option 2: `ggplot` + `geom_map`
+
+For an example that plots state data, see the [ggplot2 reference page](https://ggplot2.tidyverse.org/reference/geom_map.html).
+This example uses the [`ggcounty` package](https://github.com/hrbrmstr/ggcounty) to plot county data. You may need to first install the `devtools` package, and then install the `ggcounty` pacakge via the commands
+
+```
+library(devtools)
+devtools::install_github("hrbrmstr/ggcounty")
+```
+
+```{r}
+library(ggcounty)
+
+# reformat the FIPS region codes
+elect<-elect%>%
+  mutate(FIPS=ifelse(region<10000,paste("0",as.character(region),sep=""),as.character(region)))
+
+# define appropriate (& nicely labeled) breaks
+elect$brk <- cut(elect$perrep_2016, 
+                      breaks=seq(0,100,by=10), 
+                      labels=c("0-9", "10-19", "20-29", "30-39", 
+                               "40-49", "50-59", "60-69", "70-79", "80-89", "90-100"),
+                      include.lowest=TRUE)
+
+# get the US counties map (lower 48)
+us <- ggcounty.us()
+
+# start the plot with our base map
+gg <- us$g
+
+# add a new geom with our data (choropleth)
+gg <- gg + geom_map(data=elect, map=us$map,
+                    aes(map_id=FIPS, fill=brk))
+
+# define nice colors
+gg <- gg + scale_fill_manual(values = rev(brewer.pal(10,"RdBu")),name="Percent Republican")
+
+# plot the map
+gg
+```
+
+
+
+### Option 3: The Simple Features (`sf`) package: `ggplot` + `geom_sf`
+
+Note: To use the geom_sf command with ggplot, you'll need to down the development version of ggplot2. You can follow the instructions [here](https://gist.github.com/kohske/1150934). The only update is that the command to install the development version on line 16 should be `install_github("hadley/ggplot2")`.
+
+
+Here is an example from Matt Strimas-Mackey's [excellent blog post](http://strimas.com/r/tidy-sf/). Use the function `st_read` to download the shape file for the counties of North Carolina, which is included in the `sf` package:
+
+```{r}
+library(sf)
+nc <- st_read(system.file("shape/nc.shp", package="sf"), quiet = TRUE)
+glimpse(nc)
+```
+
+The nice thing about this method is that the map info is now stored as a data frame (`nc`), and we will soon be familiar with how to manipulate data frames. Here is a plot of the areas of the counties, which is just one variable in the frame:
+
+```{r}
+ggplot(nc) +
+  geom_sf(aes(fill = AREA)) +
+  scale_fill_viridis("Area") +
+  ggtitle("Area of counties in North Carolina")
+```
+
+An important question when plotting spatial data is how to project data on Earth's surface onto a 2D plot. You can see a long list of different projection systems [here](https://en.wikipedia.org/wiki/List_of_map_projections). Here is an example with the Albers equal area projection:^[Note: crs is short for "coordinate reference system."]
+
+```{r}
+ggplot(nc) +
+  geom_sf(aes(fill = AREA)) +
+  scale_fill_viridis("Area") +
+  coord_sf(crs = st_crs(102003)) +
+  ggtitle("Area of counties in North Carolina (Albers)")
+```
+
+
+We can also place a choropleth map on top of a Google map:^[Note: Despite much effort, I have not yet figured out why the two maps don't align perfectly. It has something to do with the longlat projections and bounding boxes used by ggmap ([see here](http://rstudio-pubs-static.s3.amazonaws.com/16660_7d1ab1b355344578bbacb0747fd485c8.html)).]
+
+```{r cache=TRUE}
+NCMap<-get_map(location = c(-80.843,35.227),source="google",maptype="roadmap",zoom=6)
+ggmap(NCMap) +
+  geom_sf(data=nc,aes(fill = AREA),inherit.aes = FALSE) + 
+  scale_fill_viridis("Area") +
+  ggtitle("Area of counties in North Carolina")
+```
+
+### Option 4: Shape files
+
+The next two methods read in the spatial geometry information as different types of shape files, rather than as data frames like the `sf` package. Therefore, I find them a bit more difficult to use, but since the `sf` package is still in development, some tasks are easier to do with these other approaches.
+
+
+There are different **spatial data structures** for storing information such as the boundaries of the regions on which the data reside. For example, a single data point may describe a statistic about a county, and the *shape files* contain information about points, lines, polygons, or pixels used to describe the boundaries and regions of these counties. Examples of shape file extensions include .shp, .shx, and .dbf. [Here](https://www.r-bloggers.com/r-and-gis-working-with-shapefiles/) is an example of how to load and work with shape files using the `sp`, `rgdal`, and `maptools` packages, and [here](https://mgimond.github.io/Spatial/) is a nice open source manuscript on the topic. The packages `shapefiles` and `tigris` provide easy access to some shape files, and you can find many others online.
+
+
+We'll again start with the map of North Carolina from Google, but we'll pull the county shapes from the `tigris` package:
+```{r,warning=FALSE}
+library(tigris)
+nc_counties <- counties(state = 'NC',cb = TRUE, resolution = '5m')
+```
+
+Note that `nc_counties` is not a regular data frame, but a `SpatialPolygonsDataFrame`, which, suffice it to say, and not as easy to manipulate without some extra practice. Different methods to work with these frames include the `tidy` function from the `broom` package (a bit involved), using the combination `ggplot` + `geom_polygon`, or using the `sp` package (often in combination with `rgdal`). We won't cover the details of any of these, but you can investigate if you are interested. 
+
+One (relatively) easier way to deal with a `SpatialPolygonsDataFrame` containing the spatial data structure is with the `tmap` and `tmaptools` packages, which does more of the formatting behind the scenes. [Here](https://cran.r-project.org/web/packages/tmap/vignettes/tmap-nutshell.html) are some nice demos. And here is one way to plot our data with the functions from `tmap`:
+
+```{r}
+library(tmap)
+library(tmaptools)
+nc_counties@data$ALAND<-as.numeric(nc_counties@data$ALAND)
+tm_shape(nc_counties)+
+  tm_polygons("ALAND",palette=viridis(n=25),style="cont",title="Area of counties in North Carolina")
+```
+
+Personally, I prefer the new `geom_sf` method described above, since it is a frame and we can do `dplyr` things on it (like grouping counties, filtering out certain locations, etc., with those operations applying to both the data and the underlying geometries).
+
+## Dynamic maps with `leaflet`
+
+We may return to cover more  about interactivity  later in the semester, 
+but it is now easy to add interactivity to spatial data visualizations with the `leaflet` package. Let's try it out with our last graph:
+
+```{r}
+library(leaflet)
+tmap_mode("view")
+last_map()
+```
+
+You can now zoom in and out, and also click on individual states to find the land area values. You can read more about `leaflet` [here](https://rstudio.github.io/leaflet/). [This](https://rstudio.github.io/leaflet/choropleths.html) is a really nice demonstration of interactive choropleths with `leaflet`
+
+Here is another example with the Starbucks data:
+
+```{r}
+leaflet(Starbucks)%>%
+  setView(-93.1687,44.9398,zoom = 11)%>% 
+  addProviderTiles("OpenStreetMap.Mapnik") %>% 
+  addCircleMarkers(lat=~Latitude,lng=~Longitude, popup=~paste(City,": ",`Store Name`,sep=""))
+```
+
+
+# Storytelling Practice
+
+Now that we've learned the basics of *constructing* visualizations, let's consider using visualizations to tell a story.  Here are some examples:    
+
+- [Dear Amazon](https://www.nytimes.com/interactive/2017/09/09/upshot/where-should-amazon-new-headquarters-be.html)
+
+- [fivethirtyeight article on gun deaths](https://fivethirtyeight.com/features/gun-deaths/)
+
+- [fivethirtyeight article on the German election](https://fivethirtyeight.com/features/six-charts-to-help-americans-understand-the-upcoming-german-election/)
+
+
+
+## Hate Crimes
+
+In January 2017, fivethirtyeight.com published [an article on hate crime rates across the US](https://fivethirtyeight.com/features/higher-rates-of-hate-crimes-are-tied-to-income-inequality/).  A tidied up version of their data are available at 
+https://www.macalester.edu/~ajohns24/data/hate_crimes_extra.csv
+
+
+```{exercise name="Getting Started"}
+```
+
+a. Load the data and store it as `US_crime`.    
+
+b. What are the units of observation and how many observations are there?    
+
+c. These `US_crime` data were generated from the `hate_crimes` data set in the `fivethirtyeight` package.  Examine the codebook for the `hate_crimes` data.  Note that `US_crime` contains these same variables plus 3 more:    
+      - `crimes_pre` = average daily hate crimes per 100,000 population (2010-2015)    
+      - `crimes_post` = average daily hate crimes per 100,000 population (November 9-18, 2016)    
+      - `crimes_diff` = difference in the average daily hate crimes per 100,000 population after the election vs before the election (`crimes_post - crimes_pre`)
+      - `trump_win` = an indicator of whether Trump won    
+      
+      In comparing hate crime rates before and after the election, why is it better to examine `crimes_pre` vs `crimes_post` than `avg_hatecrimes_per_100k_fbi` vs `hate_crimes_per_100k_splc`? What other issues should we note about these data sources?
+
+
+```{exercise name="Trends in Hate Crimes"}
+```
+
+a. Explain why, if we want to study possible connections between hate crime rates and the election, we should use `crimes_diff` instead of `crimes_post` in our analysis.    
+
+b. Write a mini-story with four visualizations and 1-2 sentences per visualization that examines the following relationships:    
+    - a choropleth of `crimes_diff` (be sure to note how these values compare to 0 and the contextual significance of this);    
+    - the bivariate relationship between `crimes_diff` vs `trump_win`         
+    - the bivariate relationship between `crimes_diff` vs `share_vote_trump`         
+    - the trivariate relationship between `crimes_diff` vs `gini_index` and `trump_win`    
+
+```{exercise name="Multivariate Visualizations"}
+There are several variables we haven't considered yet!  Instead of cherry picking 2-3 variables at a time, we can visualize all at once.  Before you get started, use the following syntax to eliminate some redundant variables and give the data row names.  (Don't worry about the syntax itself!)    
+```
+```{r}
+US_crime <- read_csv("https://www.macalester.edu/~ajohns24/data/hate_crimes_extra.csv")
+```
+
+```{r}
+#make a copy of US_crime
+US_crime_new <- US_crime
+
+#treat states as row names
+row.names(US_crime_new) <- US_crime_new$state
+
+#take out some variables
+US_crime_new <- select(US_crime_new, -c(state,median_house_inc,hate_crimes_per_100k_splc,avg_hatecrimes_per_100k_fbi,crimes_pre,crimes_post,trump_win))
+
+#store as a matrix
+crime_mat <- data.matrix(US_crime_new)
+```
+
+Check the dimensions of the new data table:    
+```{r}
+dim(US_crime_new)
+```    
+
+a. Use the code below to construct a heat map of variables, along with a *dendrograms* to help to identify interesting row clusters.  Note that each variable (column) is scaled to indicate states (rows) with high values (pink) to low values (blue). Comment on two interesting clusters (e.g., do you note any regional patterns?).
+
+```{r eval=FALSE}    
+heatmap(crime_mat, Colv=NA, scale="column", col=cm.colors(256))
+```   
+    
+b. Construct the following *star plot* visualization.  Like heat maps, these visualizations indicate the relative scale of each variable for each state.  With this in mind, use the star map to identify which state is the most "unusual".    
+```{r eval=FALSE}
+stars(crime_mat, flip.labels=FALSE, key.loc=c(15,1.5), draw.segments=TRUE)
+```    
+
+
+## Jam of the Week
+
+```{r, out.width = "400px",echo=FALSE}
+knitr::include_graphics("https://www.macalester.edu/~dshuman1/data/112/JamOfTheWeek.png")
+```
+
+```{exercise name="Tell a Story About Jam of the Week"}
+Online spaces now augment physical spaces where people share, critique, and study musical performance. This research studies "Jam of the Week", an online Facebook community with over 50,000 members. The `jotw` data contain the first 30,000+ posts to the Facebook group:
+  
+```
+
+```{r}
+jotw <- read_csv("https://www.macalester.edu/~ajohns24/data/jam_of_the_week.csv") 
+```
+
+Each row represents a single jam posted to the group.  Variables include:    
+- `gender` = gender of the musician in the post    
+- `num_reactions`, `num_comments`, etc = number of reactions to, comments on, etc the post    
+- `year_day`, `week_day`, `hour` = indicators of when the jam was posted    
+
+    
+Tell a story about Jam of the Week.  In doing so, consider the following research question as a prompt: *To what extent does online behavior adhere to or transcend existing biases related to gender?*
+
