@@ -281,7 +281,7 @@ makemap <- function(anc, anc6, anc2, food_groceries0, meals0, SNAP_food_stamps0,
                      options = layersControlOptions(collapsed = FALSE))
   
   cat("Success!")
-  saveWidget(homeless_interactive_map_final_with_api, file="index.html")
+  saveWidget(homeless_interactive_map_final_with_api, file="index.html", selfcontained = FALSE)
   cat("Saved the html map to the current directory.")
   return(homeless_interactive_map_final_with_api)
   
